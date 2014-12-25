@@ -122,7 +122,10 @@ public class DefaultExceptionMapper implements IExceptionMapper
 		}
 		else
 		{
-			logger.error("Unexpected error occurred", e);
+			if (!application.usesDevelopmentConfig())
+				/** Otherwise the error is logged in {@link RequestCycle#handleException(Exception)} already. */
+				logger.error("Unexpected error occurred", e);
+
 			return mapUnexpectedException(e, application);
 		}
 	}

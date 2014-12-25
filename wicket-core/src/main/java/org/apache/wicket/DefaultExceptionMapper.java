@@ -122,32 +122,35 @@ public class DefaultExceptionMapper implements IExceptionMapper
 		}
 		else
 		{
-
-			final UnexpectedExceptionDisplay unexpectedExceptionDisplay = application.getExceptionSettings()
-				.getUnexpectedExceptionDisplay();
-
 			logger.error("Unexpected error occurred", e);
-
-			if (IExceptionSettings.SHOW_EXCEPTION_PAGE.equals(unexpectedExceptionDisplay))
-			{
-				Page currentPage = extractCurrentPage();
-				return createPageRequestHandler(new PageProvider(new ExceptionErrorPage(e,
-					currentPage)));
-			}
-			else if (IExceptionSettings.SHOW_INTERNAL_ERROR_PAGE.equals(unexpectedExceptionDisplay))
-			{
-				return createPageRequestHandler(new PageProvider(
-					application.getApplicationSettings().getInternalErrorPage()));
-			}
-			else
-			{
-				// IExceptionSettings.SHOW_NO_EXCEPTION_PAGE
-				return new ErrorCodeRequestHandler(500);
-			}
+			return mapUnexpectedException(e, application);
 		}
 	}
 
-	private RenderPageRequestHandler createPageRequestHandler(PageProvider pageProvider)
+	protected IRequestHandler mapUnexpectedException(Exception e, final Application application)
+	{
+		final UnexpectedExceptionDisplay unexpectedExceptionDisplay = application.getExceptionSettings()
+			.getUnexpectedExceptionDisplay();
+
+		if (IExceptionSettings.SHOW_EXCEPTION_PAGE.equals(unexpectedExceptionDisplay))
+		{
+			Page currentPage = extractCurrentPage();
+			return createPageRequestHandler(new PageProvider(new ExceptionErrorPage(e,
+				currentPage)));
+		}
+		else if (IExceptionSettings.SHOW_INTERNAL_ERROR_PAGE.equals(unexpectedExceptionDisplay))
+		{
+			return createPageRequestHandler(new PageProvider(
+				application.getApplicationSettings().getInternalErrorPage()));
+		}
+		else
+		{
+			// IExceptionSettings.SHOW_NO_EXCEPTION_PAGE
+			return new ErrorCodeRequestHandler(500);
+		}
+	}
+
+	protected RenderPageRequestHandler createPageRequestHandler(PageProvider pageProvider)
 	{
 		RequestCycle requestCycle = RequestCycle.get();
 
@@ -171,7 +174,7 @@ public class DefaultExceptionMapper implements IExceptionMapper
 		return new RenderPageRequestHandler(pageProvider, redirect);
 	}
 
-	private boolean isProcessingAjaxRequest()
+	protected boolean isProcessingAjaxRequest()
 	{
 		RequestCycle rc = RequestCycle.get();
 		Request request = rc.getRequest();
@@ -186,7 +189,7 @@ public class DefaultExceptionMapper implements IExceptionMapper
 	 * @return the page being rendered when the exception was thrown, or {@code null} if it cannot
 	 *         be extracted
 	 */
-	private Page extractCurrentPage()
+	protected Page extractCurrentPage()
 	{
 		final RequestCycle requestCycle = RequestCycle.get();
 
